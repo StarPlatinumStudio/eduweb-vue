@@ -130,7 +130,7 @@
   </el-button-group>
   </el-form>
   </el-dialog>
-   <el-dialog
+  <el-dialog
   title="添加班级"
   :visible.sync="addClassDialogVisible"
   width="90%"
@@ -145,7 +145,9 @@
   <el-form-item label="介绍详情"   prop="detial" autocomplete="off" :rules="[{ required: true, message: '介绍详情不能为空'}]">
     <el-input type="textarea" v-model="saveClassForm.detial"></el-input>
   </el-form-item>
-  <el-button type="primary" round style="width: 100%"  @click="saveClass('saveClassForm')" v-loading.fullscreen.lock="fullscreenLoading">确认</el-button>
+      班级相册超连接（可选）
+    <el-input v-model="saveClassForm.pictures"></el-input>
+  <el-button type="primary" round style="margin-top: 20px;width: 100%"  @click="saveClass('saveClassForm')" v-loading.fullscreen.lock="fullscreenLoading">确认</el-button>
   </el-form>
   </el-dialog>
   <el-dialog title="编辑班级" :visible.sync="editClassDialogVisible" width="90%" >
@@ -162,7 +164,9 @@
     <el-form-item label="介绍详情"   prop="detial" autocomplete="off" :rules="[{ required: true, message: '介绍详情不能为空'}]">
       <el-input type="textarea" v-model="saveClassForm.detial"></el-input>
     </el-form-item>
-    <el-button type="primary" round style="width: 100%"  @click="editClass('saveClassForm')" v-loading.fullscreen.lock="fullscreenLoading">确认</el-button>
+          班级相册超连接（可选）
+    <el-input v-model="saveClassForm.pictures"></el-input>
+    <el-button type="primary" round style="margin-top：20px;width: 100%"  @click="editClass('saveClassForm')" v-loading.fullscreen.lock="fullscreenLoading">确认</el-button>
     </el-form>
   </el-dialog>
   <el-dialog title="处理VIP请求" :visible.sync="vipRequestDialogVisible" width="90%" >
@@ -188,6 +192,11 @@
   </el-dialog>
   <el-dialog :visible.sync="imgPreviewDialogVisible">
     <img width="100%" :src="imgPreviewDialogImageUrl" alt="">
+  </el-dialog>
+   <el-dialog title="点评" :visible.sync="commentDialogVisible" width="90%">
+     点评{{comment.nickname}}的作业
+    <el-input type="textarea" placeholder='在这里填写内容' v-model="comment.comment" height='100px'></el-input>
+    <el-button type="primary" round style="width: 100%"  @click="saveComment()" v-loading.fullscreen.lock="fullscreenLoading">提交点评</el-button>
   </el-dialog>
   <el-header style="padding:0;">
     <el-page-header @back="goBack" content="言桥教育 管理控制台">
@@ -250,6 +259,7 @@
       <el-row>
         <el-button type="primary" round style="width: 100%"  @click="saveSchoolForm={};addSchoolDialogVisible=true" v-loading.fullscreen.lock="fullscreenLoading">添加校区</el-button>
       </el-row>
+      <br/>
       <el-row>
         <el-button type="primary" round style="width: 100%"  @click="saveClassForm={};addClassDialogVisible=true" v-loading.fullscreen.lock="fullscreenLoading">添加班级</el-button>
       </el-row>
@@ -289,7 +299,7 @@
         fixed="right"
         label="操作">
           <template slot-scope="classscope">
-           <el-button @click="saveClassForm = {id: allClass[classscope.$index].id,name: allClass[classscope.$index].label,school :allClass[classscope.$index].school, detial: allClass[classscope.$index].detial};editClassDialogVisible=true" type="text">编辑</el-button>
+           <el-button @click="saveClassForm = {id: allClass[classscope.$index].id,name: allClass[classscope.$index].label,school :allClass[classscope.$index].school, detial: allClass[classscope.$index].detial, pictures: allClass[classscope.$index].pictures};editClassDialogVisible=true" type="text">编辑</el-button>
           </template>
        </el-table-column>
       </el-table>
@@ -301,8 +311,7 @@
     <el-tab-pane label="用户列表" name="1">
       <el-card class="box-card" style="margin:10px">
         <el-collapse>
-          记录在案的用户列表:
-          <hr/>
+          <el-divider content-position="left">记录在案的用户列表:</el-divider>
           <el-collapse-item v-for="(item, index) in allUsers" :key="index" :title="item.nickname" :name='index' style="text-align: left;">
             <template slot="title">
               <el-avatar icon="el-icon-user-solid" :src='item.headimgurl'></el-avatar>&nbsp;{{item.nickname}}&nbsp;&nbsp;<i class="header-icon el-icon-info"></i>
@@ -321,8 +330,7 @@
     <el-tab-pane label="会员申请" name="2">
       <el-card class="box-card" style="margin:10px">
         <el-collapse>
-          待处理的用户VIP申请列表:
-          <hr/>
+          <el-divider content-position="left">待处理的用户VIP申请列表:</el-divider>
           <el-collapse-item v-for="(item, index) in vipRequest.waiting" :key="index" :title="item.nickname" :name='index' style="text-align: left;">
             <template slot="title">
               <el-avatar icon="el-icon-user-solid" :src='item.headimgurl'></el-avatar>&nbsp;{{item.nickname}}&nbsp;&nbsp;<i class="header-icon el-icon-info"></i>
@@ -338,8 +346,7 @@
        </el-card>
        <el-card class="box-card" style="margin:10px">
         <el-collapse>
-          已通过的用户VIP申请列表:
-          <hr/>
+          <el-divider content-position="left">已通过的用户VIP申请列表:</el-divider>
           <el-collapse-item v-for="(item, index) in vipRequest.agree" :key="index" :title="item.nickname" :name='index' style="text-align: left;">
             <template slot="title">
               <el-avatar icon="el-icon-user-solid" :src='item.headimgurl'></el-avatar>&nbsp;{{item.nickname}}&nbsp;&nbsp;<i class="header-icon el-icon-info"></i>
@@ -359,8 +366,7 @@
        </el-card>
        <el-card class="box-card" style="margin:10px">
         <el-collapse>
-          已拒绝的用户VIP申请列表:
-          <hr/>
+          <el-divider content-position="left">已拒绝的用户VIP申请列表:</el-divider>
           <el-collapse-item v-for="(item, index) in vipRequest.refuse" :key="index" :title="item.nickname" :name='index' style="text-align: left;">
             <template slot="title">
               <el-avatar icon="el-icon-user-solid" :src='item.headimgurl'></el-avatar>&nbsp;{{item.nickname}}&nbsp;&nbsp;<i class="header-icon el-icon-info"></i>
@@ -378,8 +384,8 @@
          </el-collapse>
        </el-card>
     </el-tab-pane>
-    <el-tab-pane label="班级管理" name="3">
-    </el-tab-pane>
+    <!-- <el-tab-pane label="班级管理" name="3">
+    </el-tab-pane> -->
   </el-tabs>
     </el-tab-pane>
       <el-tab-pane label="资源管理" name="4" :disabled="myAuth.edit">资源管理</el-tab-pane>
@@ -391,27 +397,30 @@
                 <template slot="title">
                   帮助&nbsp;&nbsp;&nbsp;<i class="header-icon el-icon-info"></i>
                 </template>
-                <div style="text-align: left">完成时间：开始时间在未来的，会归入【即将开始的作业】中，开始时间在未来的，会归入【即将开始的作业】中</div>
+                <div style="text-align: left">
+                  <p>完成时间：开始时间在未来的，会归入【即将开始的作业】中，开始时间在未来的，会归入【即将开始的作业】中</p>
+                  <p>图片最多上传9张，视频最多上传1个，为了用户视频体验，上传的视频请压缩在100M以内</p></div>
               </el-collapse-item>
               </el-collapse>
-              <el-form ref="form" :model="form" label-width="80px">
-                <el-form-item label="作业名称">
-                  <el-input v-model="form.name"></el-input>
+              <el-form ref="homeWorkForm" :model="homeWorkForm" >
+                <el-form-item label="作业名称" prop="name" :rules="[{ required: true, message: '不能为空'}]">
+                  <el-input v-model="homeWorkForm.name" ></el-input>
                 </el-form-item>
-                <el-form-item label="选择班级">
-                  <el-cascader v-model="saveClassForm.school" :options="schoolOption" :show-all-levels="false"></el-cascader>
+                <el-form-item label="选择班级" prop="theclass" :rules="[{ required: true, message: '不能为空'}]">
+                  <el-cascader v-model="homeWorkForm.theclass" multiple :options="allClass" :show-all-levels="false"></el-cascader>
                 </el-form-item>
-                <el-form-item label="完成时间">
-                  <el-col :span="11">
-                    <el-date-picker type="date" placeholder="开始日期" v-model="form.date1" style="width: 100%;"></el-date-picker>
-                  </el-col>
-                  <el-col class="line" :span="2">&nbsp;到</el-col>
-                  <el-col :span="11">
-                    <el-date-picker type="date" placeholder="结束日期" v-model="form.date2" style="width: 100%;"></el-date-picker>
+                <el-form-item label="开始时间" prop="starttime" :rules="[{ required: true, message: '不能为空'}]">
+                  <el-col>
+                    <el-date-picker type="date" placeholder="开始日期" v-model="homeWorkForm.starttime" style="width: 100%;"></el-date-picker>
                   </el-col>
                 </el-form-item>
-                <el-form-item label="详情描述">
-                  <el-input type="textarea" v-model="form.desc"></el-input>
+                <el-form-item label="截至时间" prop="finishtime" :rules="[{ required: true, message: '不能为空'}]">
+                  <el-col>
+                    <el-date-picker type="date" placeholder="结束日期" v-model="homeWorkForm.finishtime" style="width: 100%;"></el-date-picker>
+                  </el-col>
+                </el-form-item>
+                <el-form-item label="详情描述" prop="detial" :rules="[{ required: true, message: '不能为空'}]">
+                  <el-input type="textarea" v-model="homeWorkForm.detial"></el-input>
                 </el-form-item>
                 <el-form-item label="添加图片">
                 </el-form-item>
@@ -426,7 +435,7 @@
                   multiple
                   :limit="limit"
                   :on-exceed="handleExceed"
-                  :file-list="fileList"
+                  :file-list="homeWorkForm.fileList"
                   :list-type="listType"
                   accept="image/*"
                 >
@@ -450,7 +459,7 @@
                 :limit="videoLimit"
                 :before-remove="videoRemove"
                 :on-remove="handleRemove"
-                :file-list="videoList">
+                :file-list="homeWorkForm.videoList">
                   <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
                 </el-upload>
                </el-form-item>
@@ -459,6 +468,35 @@
               </el-form>
             </el-tab-pane>
             <el-tab-pane label="作业列表" name="2">
+              <el-row>
+                选择要查询的班级<el-cascader v-model="searchTheClass" :options="allClass" :show-all-levels="false"></el-cascader>
+                <el-button icon="el-icon-search" round @click="searchHomeWork"></el-button>
+              </el-row>
+                <el-card class="box-card" style="margin:10px">
+                <el-row><el-tag>作业</el-tag> 班级作业表</el-row>
+                <el-row v-for="(item, index) in classHomeWork" :key="index">
+                  <el-row><p>{{item.name}}</p><small style="color: #909399">{{item.starttime.substring(0,10)}}到{{item.finishtime.substring(0,10)}}</small></el-row>
+                  <el-row><el-button-group>
+                    <el-button round @click="$store.state.homeWorkDetial=classHomeWork[index];$router.push({ name: 'HomeWorkDetial'})">预览</el-button>
+                    <el-button round>编辑</el-button>
+                    <el-button round @click="searchUserHomeWork(item.id)">查询</el-button>
+                  </el-button-group></el-row>
+                  <el-divider></el-divider>
+                </el-row>
+              </el-card>
+              <el-divider content-position="left">提交的作业查询结果</el-divider>
+              <el-collapse accordion>
+                <el-collapse-item  v-for="(item, index) in userHomeWork" :key="index" :title="item.nickname" :name='index'>
+                 <template slot="title">
+                   <el-avatar icon="el-icon-user-solid" :src='item.headimgurl'></el-avatar>&nbsp;{{item.nickname}}&nbsp;&nbsp;<i class="header-icon el-icon-info"></i>
+                 </template>
+                 <el-row>创建时间：{{item.createtime}}</el-row>
+                 <el-row>{{item.detial}}</el-row>
+                 <el-image style="margin-top: 20px" v-for="url in item.pictures" :key="url" :src="url"></el-image>
+                 <video style="width:100%;margin-top: 20px" v-if="item.video" :src="item.video" controls="controls">您的浏览器不支持 video 标签。</video>
+                 <el-button @click="comment.comment=item.comment;comment.nickname = item.nickname;comment.id = item.id;commentDialogVisible = true">点评</el-button>
+                </el-collapse-item>
+              </el-collapse>
             </el-tab-pane>
            </el-tabs>
       </el-tab-pane>
@@ -512,8 +550,6 @@ export default {
         resource: '',
         desc: ''
       },
-      videoList: [],
-      fileList: [],
       homeWorkBtnStatus: '立即发布',
       homeWorkBtnAttr: false,
       imgPreviewDialogImageUrl: '',
@@ -524,8 +560,11 @@ export default {
       allClass: [{}],
       allAdmin: [{}],
       allUsers: [{}],
+      classHomeWork: [],
+      userHomeWork: [],
       vipRequest: {waiting: [], agree: [], refuse: []},
       myForm: {},
+      homeWorkForm: {fileList: [], videoList: []},
       adminForm: {},
       adminFormAuthoritys: {
         admin: false,
@@ -551,7 +590,9 @@ export default {
         edit: false,
         event: false
       },
+      comment: {comment: ''},
       myAuth: {},
+      searchTheClass: '',
       editClassDialogVisible: false,
       addSchoolDialogVisible: false,
       editSchoolDialogVisible: false,
@@ -559,6 +600,7 @@ export default {
       addAdminDialogVisible: false,
       manageAdminDialogVisible: false,
       vipRequestDialogVisible: false,
+      commentDialogVisible: false,
       fullscreenLoading: false,
       iconbtndisabled: false,
       subiconbtndisabled: true
@@ -624,16 +666,16 @@ export default {
     handleExceed (files, fileList) {
       this.$message.warning(`每次只能上传 ${this.limit} 个文件`)
     },
+    // 照片删除
     beforeRemove (file, fileList) {
-      delete this.fileList[file.uid]
+      delete this.homeWorkForm.fileList[file.uid]
       console.log(this.fileList)
     },
     videoRemove (file, fileList) {
-      delete this.videoList[file.uid]
+      delete this.homeWorkForm.videoList[file.uid]
     },
     handleSuccess (response, file, fileList) {
       console.log('updown succeed')
-      // this.fileList = fileList
       this.$emit('on-success', file, fileList)
     },
     /**
@@ -643,13 +685,13 @@ export default {
       // 生成的文件名称
       // let objName = getFileNameUUID()
       // 调用 ali-oss 中的方法
+      // 上传时锁定发布按钮
       this.homeWorkBtnStatus = '上传中'
       this.homeWorkBtnAttr = true
-      // console.log(this.fileList)
       put(option.file.uid + option.file.name, option.file).then(res => {
         this.homeWorkBtnStatus = '立即发布'
         this.homeWorkBtnAttr = false
-        this.fileList[option.file.uid] = res.url
+        this.homeWorkForm.fileList[option.file.uid] = res.url
         // console.log(res)
         // console.log(option)
       })
@@ -660,7 +702,7 @@ export default {
       put(option.file.uid + option.file.name, option.file).then(res => {
         this.homeWorkBtnStatus = '立即发布'
         this.homeWorkBtnAttr = false
-        this.videoList[option.file.uid] = res.url
+        this.homeWorkForm.videoList[option.file.uid] = res.url
       })
     },
     goBack () {
@@ -763,7 +805,9 @@ export default {
     saveSchool (saveSchoolForm) {
       this.$refs[saveSchoolForm].validate((valid) => {
         if (valid) {
-          var newSchool = {label: this.saveSchoolForm.name, value: this.saveSchoolForm.name, address: this.saveSchoolForm.address, detial: this.saveSchoolForm.detial}
+          var newSchool = this.saveSchoolForm
+          newSchool.label = this.saveSchoolForm.name
+          newSchool.value = this.saveSchoolForm.name
           this.fullscreenLoading = true
           this.$http.post(process.env.url + '/api/saveschool', newSchool).then(response => {
             if (response.data.ret === 0) {
@@ -779,7 +823,9 @@ export default {
       })
     },
     editSchool (index) {
-      var newSchool = {id: this.saveSchoolForm.id, label: this.saveSchoolForm.name, value: this.saveSchoolForm.name, address: this.saveSchoolForm.address, detial: this.saveSchoolForm.detial}
+      var newSchool = this.saveSchoolForm
+      newSchool.label = this.saveSchoolForm.name
+      newSchool.value = this.saveSchoolForm.name
       this.$http.post(process.env.url + '/api/saveschool', newSchool).then(response => {
         if (response.data.ret === 0) {
           this.$message.success(response.data.msg)
@@ -796,7 +842,10 @@ export default {
     saveClass (saveClassForm) {
       this.$refs[saveClassForm].validate((valid) => {
         if (valid) {
-          var newClass = {label: this.saveClassForm.name, value: this.saveClassForm.name, detial: this.saveClassForm.detial, school: this.saveClassForm.school}
+          var newClass = this.saveClassForm
+          newClass.label = this.saveClassForm.name
+          newClass.value = this.saveClassForm.name
+          newClass.school = this.saveClassForm.school[0]
           this.fullscreenLoading = true
           this.$http.post(process.env.url + '/api/savetheclass', newClass).then(response => {
             if (response.data.ret === 0) {
@@ -814,7 +863,10 @@ export default {
       })
     },
     editClass (index) {
-      var newClass = {id: this.saveClassForm.id, label: this.saveClassForm.name, value: this.saveClassForm.name, detial: this.saveClassForm.detial, school: this.saveClassForm.school}
+      var newClass = this.saveClassForm
+      newClass.label = this.saveClassForm.name
+      newClass.value = this.saveClassForm.name
+      newClass.school = this.saveClassForm.school[0]
       this.$http.post(process.env.url + '/api/savetheclass', newClass).then(response => {
         if (response.data.ret === 0) {
           this.$message.success(response.data.msg)
@@ -830,8 +882,38 @@ export default {
       })
     },
     saveHomeWork () {
-    // TODO
-      console.log(this.fileList, this.videoList)
+      this.$refs['homeWorkForm'].validate((valid) => {
+        if (valid) {
+          if (this.homeWorkForm.starttime <= this.homeWorkForm.finishtime) {
+            let data = this.homeWorkForm
+            data.pictures = []
+            for (let index in data.fileList) {
+              data.pictures.push(data.fileList[index])
+            }
+            data.pictures = JSON.stringify(data.pictures)
+            for (let index in data.videoList) {
+              data.video = data.videoList[index]
+            }
+            data.createtime = getDate(new Date())
+            data.adminname = this.myForm.name
+            data.theclass = data.theclass[0]
+            console.log(data)
+            this.fullscreenLoading = true
+            this.$http.post(process.env.url + '/api/savehomework', data).then(response => {
+              if (response.data.ret === 0) {
+                this.$message.success(response.data.msg)
+                console.log('succeed', response.data)
+              } else {
+                this.$message.error(response.data.msg)
+              }
+              this.fullscreenLoading = false
+            })
+          } else {
+            this.$message.error('截至时间不可在开始时间之前')
+            return false
+          }
+        }
+      })
     },
     saveVipRequest (statu) {
       if (statu === '已同意' && this.vipRequestForm.theclass === null) {
@@ -868,6 +950,35 @@ export default {
           this.$message.error(response.data.msg)
         }
         this.fullscreenLoading = false
+      })
+    },
+    saveComment () {
+      this.$http.post(process.env.url + '/api/commenthomework?id=' + this.comment.id + '&commentadmin=' + this.adminInfo.name + '&comment=' + this.comment.comment + '&commenttime=' + getDate(new Date())).then(response => {
+        if (response.data.ret === 0) {
+          this.$message.success('点评成功')
+          this.commentDialogVisible = false
+        } else {
+          this.$message.error(response.data.msg)
+        }
+        this.fullscreenLoading = false
+      })
+    },
+    searchUserHomeWork (id) {
+      this.userHomeWork = []
+      this.$http.get(process.env.url + '/api/userhomework?id=' + id).then(response => {
+        response.data.forEach(element => {
+          element.pictures = JSON.parse(element.pictures)
+          this.userHomeWork.push(element)
+        })
+      })
+    },
+    searchHomeWork () {
+      this.$http.get(process.env.url + '/api/classhomework?theclass=' + this.searchTheClass).then(response => {
+        if (response.data.ret === 0) {
+          this.classHomeWork = response.data.data
+        } else {
+          this.$message.error(response.data.msg)
+        }
       })
     }
   }

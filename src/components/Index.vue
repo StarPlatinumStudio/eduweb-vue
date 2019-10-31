@@ -1,5 +1,6 @@
 <template>
 <div>
+  <div class="helf-radiu"></div>
   <el-row class="el-menu">
    <el-menu :default-active="activeIndex"  mode="horizontal" >
     <el-menu-item index="1">主页</el-menu-item>
@@ -9,42 +10,36 @@
    </el-menu>
   </el-row>
   <el-row>
-      <el-col  :xs='{span: 24,}' :sm='{span: 16, offset: 4}' :md='{span: 16, offset: 4}' :lg='{span: 12, offset: 6}' :xl='{span: 12, offset: 6}'>
-        {{$store.state.userData.nickname}}
-      </el-col>
-    </el-row>
+    <el-col  :xs='{span: 22, offset: 1}' :sm='{span: 16, offset: 4}' :md='{span: 12, offset: 6}' :lg='{span: 12, offset: 6}' :xl='{span: 8, offset: 8}'>
+     <h3 style="color: aliceblue;">言桥教育</h3>
+    </el-col>
+  </el-row>
+    <el-row>
+    <el-col  :xs='{span: 22, offset: 1}' :sm='{span: 16, offset: 4}' :md='{span: 12, offset: 6}' :lg='{span: 12, offset: 6}' :xl='{span: 8, offset: 8}'>
+      <el-card>
+       <el-carousel indicator-position="outside">
+    <el-carousel-item v-for="item in ['言桥教育']" :key="item">
+      <center><h3>{{ item }}</h3></center>
+    </el-carousel-item>
+  </el-carousel>
+      </el-card>
+    </el-col>
+  </el-row>
+  <el-main v-if="$store.state.userData.theclass">
+
+  </el-main>
   </div>
 </template>
-<script src="http://gosspublic.alicdn.com/aliyun-oss-sdk-4.4.4.min.js"></script>
 <script>
 export default {
   name: 'index',
   data () {
     return {
-      openid: this.$route.query.openid,
-      access_token: this.$route.query.access_token,
-      userinfo: {},
       activeName: '1',
-      activeIndex: '1',
-      status: 'ready',
-      files: [],
-      point: {},
-      uploading: false,
-      percent: 0
+      activeIndex: '1'
     }
-  },
-  mounted () {
-    if(this.$route.query.openid != undefined){
-    this.$store.state.openid=this.$route.query.openid
-    this.$store.state.access_token=this.$route.query.access_token
-    if(JSON.stringify(this.$store.state.userData) === '{}'){
-    this.$http.get('http://robinwang.nat300.top/weixin/getinfo?openid=' + this.openid + '&access_token=' + this.access_token).then(response => {
-      this.userinfo = response.data
-      this.$store.state.userData = response.data
-    })
-    }}
   }
-    }
+}
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
@@ -63,5 +58,28 @@ li {
 }
 a {
   color: #42b983;
+}
+.helf-radiu{
+       width: 300%;
+    height: 500px;
+    background-color: #2196F3;;
+    border-radius: 0 0 600px 600px;
+    position: fixed;
+    right: -400px;
+    top: -350px;
+}
+.el-carousel__item h3 {
+    color: #475669;
+    font-size: 18px;
+    opacity: 0.75;
+    line-height: 300px;
+    margin: 0;
+  }
+    .el-menu {
+    position: fixed;
+    z-index: 1024;
+    bottom: 0px;
+    width: 101%;
+  box-shadow: 0px -5px 9px 0px #90939966;
 }
 </style>

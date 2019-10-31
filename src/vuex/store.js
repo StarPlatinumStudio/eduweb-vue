@@ -10,7 +10,9 @@ const store = new Vuex.Store({
   state: {
     userData: {},
     openid: '',
-    access_token: ''
+    access_token: '',
+    homeWorkDetial: '',
+    theClass: {}
   }
 //   },
 //   getters,

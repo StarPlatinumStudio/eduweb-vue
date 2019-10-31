@@ -6,6 +6,9 @@ import Index from '@/components/Index'
 import My from '@/components/My'
 import Vip from '@/components/Vip'
 import Course from '@/components/Course'
+import HomeWorkDetial from '@/components/HomeWorkDetial'
+import EditHomeWork from '@/components/EditHomeWork'
+import MyHomeWork from '@/components/MyHomeWork'
 Vue.use(Router)
 
 export default new Router({
@@ -36,9 +39,24 @@ export default new Router({
       component: Vip
     },
     {
+      path: '/HomeWorkDetial',
+      name: 'HomeWorkDetial',
+      component: HomeWorkDetial
+    },
+    {
       path: '/Course',
       name: 'Course',
       component: Course
+    },
+    {
+      path: '/MyHomeWork',
+      name: 'MyHomeWork',
+      component: MyHomeWork
+    },
+    {
+      path: '/EditHomeWork',
+      name: 'EditHomeWork',
+      component: EditHomeWork
     }
   ]
 })
