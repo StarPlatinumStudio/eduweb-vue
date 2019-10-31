@@ -11,6 +11,9 @@ import EditHomeWork from '@/components/EditHomeWork'
 import MyHomeWork from '@/components/MyHomeWork'
 Vue.use(Router)
 
+const StudentCourse = () => import('@/components/StudentCourse')
+const ManageCourse = () => import('@/components/ManageCourse')
+
 export default new Router({
   routes: [
     {
@@ -57,6 +60,17 @@ export default new Router({
       path: '/EditHomeWork',
       name: 'EditHomeWork',
       component: EditHomeWork
+    },
+    {
+      path: '/StudentCourse',
+      name: 'StudentCourse',
+      component: StudentCourse
+    },
+    {
+      path: '/ManageCourse',
+      name: 'ManageCourse',
+      component: ManageCourse
     }
-  ]
+  ],
+  mode: 'history'
 })
